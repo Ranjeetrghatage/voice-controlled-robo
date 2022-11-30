@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<!-- saved from url=(0040)file:///C:/Users/sai/Documents/html.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Project</title>
+</head>
+<body>
+<header>
+<h1>VOICE CONTROLLED ROBO</h1></header>
+<main>
+<h3>Hardware materials used in this project are:</h3> 
+<ol>
+    <li>nodeMCUESP8266(1)     <a href="https://rukminim1.flixcart.com/image/416/416/kwtkxow0/electronic-hobby-kit/p/b/l/nodemcu-esp8266-12-v3-lua-ch340-based-wi-fi-dev-board-original-imaf8k64v9ugptha.jpeg?q=70" target="_main">nodeMCUESP8266</a></li>
+    <li>L298N motor driver(1) <a href="https://probots.co.in/pub/media/catalog/product/cache/d8ddd0f9b0cd008b57085cd218b48832/l/2/l298-motor-driver-module.jpg" target="_main">L298N motor driver</a></li>
+    <li>BO motors(4) <a href="https://rukminim1.flixcart.com/image/416/416/k48rwcw0/electronic-hobby-kit/r/b/h/4-pcs-bo-motor-dual-shaft-smart-car-robot-gear-motor-for-arduino-original-imafhzhxvqgp6nzz.jpeg?q=70" target="_main">BO motor</a></li>
+    <li>Tyres(4) <a href="https://rukminim1.flixcart.com/image/416/416/knan98w0/electronic-hobby-kit/8/c/2/robot-durable-rubber-tyre-yellow-wheel-65mmx30mm-for-bo-dc-motor-original-imag2y6rhg7axsyc.jpeg?q=70" target="_main">Tyre</a></li>
+    <li>Smart phone</li>
+    <li> App : MIT(Massachusetts Institute of Technology) website to build the app. <a href="https://appinventor.mit.edu/" target="_main">Mit app inventor website</a> </li>
+</ol>
+<hr>
+  <h3>Model :</h3>
+    <pre>                 <span><img src="C:\Users\sai\Pictures\Screenshots\Voice_robo_model.jpg" alt="Robo Model" height="300"></span></pre>
+
+<hr>
+
+<h3>App Interface :</h3>
+<pre>           <img src="C:\Users\sai\Pictures\Screenshots\app.png" alt="App interface"></pre>
+<hr>
+<h3>Working :</h3>
+<ul>
+ <li>Code is dumped into the microcontroller.</li><br>
+ <li>Voice is given to the model via app from smartphone.</li><br>
+ <li>The app converts the voice received to text and sends it to microcontroller via wifi module.</li><br>
+ <li>When the text matches with the predefined block of code dumped in microcontroller.</li><br>
+ <li>The pulse width modulation signals are sent to L298N motor driver.</li><br>
+ <li>Based on signals received the motor control the BO motors.</li><br>
+ <li>BO motors thus help to operate the wheels.</li><br>
+</ul>
+<hr>
+
+<h3>Code : </h3>
+#include <ESP8266WiFi.h>  <br>
+  WiFiClient client;       <br>
+  WiFiServer server(80);    <br>
+  const char* ssid = "";    <br>
+  const char* password = "";  <br>
+  String  command ="";         <br>
+  
+  // Set Motor Control Pins    <br>
+  int rightMotor2 = 13;      <br>
+  int rightMotor1 = 15;      <br>
+  int leftMotor2 = 0;        <br>
+  int leftMotor1 = 2;         <br>
+  int eneLeftMotor = 12;       <br>
+  int eneRightMotor = 14;      <br>
+  void setup()                  <br>
+  {                             <br>
+    Serial.begin(115200);         <br>
+  
+  
+    pinMode(leftMotor1, OUTPUT);     <br>
+    pinMode(leftMotor2, OUTPUT);      <br>
+    pinMode(rightMotor1, OUTPUT);     <br>
+    pinMode(rightMotor2, OUTPUT);     <br>
+     
+  
+    digitalWrite(leftMotor1,LOW);       <br>
+    digitalWrite(leftMotor2,LOW);       <br>
+    digitalWrite(rightMotor1,LOW);      <br>
+    digitalWrite(rightMotor2,LOW);      <br>
+        
+    connectWiFi();                      <br>
+    server.begin();                     <br>
+  }                                       <br>
+  
+  void loop()                           <br>
+  {                                       <br>
+      client = server.available();        <br>
+      if (!client) return;                  <br>
+      command = checkClient ();             <br>
+        
+           if (command == "forward")  forwardMotor();  <br>
+      else if (command == "reverse") reverseMotor();   <br>
+      else if (command == "left") leftMotor();      <br>
+      else if (command == "right") rightMotor();       <br>
+      else if (command == "stop")     stopMotor();     <br>
+       
+      sendBackEcho(); // send command echo back to android device   <br>
+      command = "";      <br>
+  }      <br>
+  
+  /* command motor forward */     <br>
+  void forwardMotor(void)         <br>
+  {                                 <br>
+    digitalWrite(eneLeftMotor,HIGH);   <br>
+    digitalWrite(eneRightMotor,HIGH);   <br>
+      
+    digitalWrite(leftMotor1,LOW);      <br>
+    digitalWrite(leftMotor2,HIGH);     <br>
+    digitalWrite(rightMotor1,LOW);     <br>
+    digitalWrite(rightMotor2,HIGH);     <br>
+  }         <br>
+  
+  /* command motor backward */    <br>
+  void reverseMotor(void)         <br>
+  {    <br>
+    digitalWrite(eneLeftMotor,HIGH);   <br>
+    digitalWrite(eneRightMotor,HIGH);   <br>
+        
+    digitalWrite(leftMotor1,HIGH);     <br>
+    digitalWrite(leftMotor2,LOW);      <br>
+    digitalWrite(rightMotor1,HIGH);     <br>
+    digitalWrite(rightMotor2,LOW);      <br>
+  }    <br>
+  
+  /* command motor turn left */      <br>
+  void leftMotor(void)               <br>  
+  {     <br>
+    digitalWrite(eneLeftMotor,HIGH);    <br>
+    digitalWrite(eneRightMotor,HIGH);     <br>
+        
+    digitalWrite(leftMotor1,HIGH);     <br>
+    digitalWrite(leftMotor2,LOW);      <br>
+    digitalWrite(rightMotor1,LOW);     <br>
+    digitalWrite(rightMotor2,HIGH);    <br>  
+  }    <br>
+    
+  /* command motor turn right */     <br>
+  void rightMotor(void)              <br>
+  {    <br>
+    digitalWrite(eneLeftMotor,HIGH);   <br>
+    digitalWrite(eneRightMotor,HIGH);   <br>
+       
+    digitalWrite(leftMotor1,LOW);   <br>
+    digitalWrite(leftMotor2,HIGH);   <br>
+    digitalWrite(rightMotor1,HIGH); <br>
+    digitalWrite(rightMotor2,LOW);   <br>
+  }   <br>
+  
+  /* command motor stop */      <br>
+  void stopMotor(void)         <br> 
+  {                                  <br> 
+    digitalWrite(eneLeftMotor,LOW);        <br> 
+    digitalWrite(eneRightMotor,LOW);        <br> 
+  
+    digitalWrite(leftMotor1,LOW);            <br> 
+    digitalWrite(leftMotor2,LOW);              <br> 
+    digitalWrite(rightMotor1,LOW);               <br> 
+    digitalWrite(rightMotor2,LOW);             <br> 
+  }                  <br> 
+  
+  /* connecting WiFi */        <br> 
+  void connectWiFi()             <br>  
+  {         <br> 
+    Serial.println("Connecting to WIFI");       <br> 
+    WiFi.begin(ssid, password);          <br> 
+    while ((!(WiFi.status() == WL_CONNECTED)))       <br> 
+    {       <br> 
+      Serial.print("..");       <br> 
+    }         <br> 
+    Serial.println("");       <br> 
+    Serial.println("WiFi connected");       <br> 
+    Serial.println("NodeMCU Local IP is : ");       <br> 
+    Serial.print((WiFi.localIP()));       <br> 
+  }         <br> 
+  
+  /* check command received from Android Device */       <br> 
+  String checkClient (void)      <br> 
+  {        <br> 
+    while(!client.available()) delay(1);        <br> 
+    String request = client.readStringUntil('\r');     <br> 
+    request.remove(0, 5);      <br> 
+    request.remove(request.length()-9,9);      <br> 
+    return request;       <br> 
+  }      <br> 
+   
+  /* send command echo back to android device */      <br> 
+  void sendBackEcho(String echo)       <br>  
+  {                                      <br> 
+    client.println("HTTP/1.1 200 OK");        <br> 
+    client.println("Content-Type: text/html");      <br> 
+    client.println("");      <br> 
+    client.println("<!DOCTYPE HTML>");      <br>  
+    client.println("<html>");         <br> 
+    client.println(echo);                  <br> 
+    client.println("</html>");             <br> 
+    client.stop();                       <br> 
+    delay(1);                      <br> 
+  }                    <br> 
+
+  <hr>
+<h3>Future Scope :</h3>              
+ 
+  <ol>
+  <li>To operate wheelchairs helpful for handicapped people.</li>
+  <li>For bomb diffusion purposes.</li>
+  <li>To explore the caves helpful for archaelogists.</li>
+  <li>implementing camera can give live pictorials to operator.</li>
+  
+</ol>
+
+
+
+</main>
+<hr>
+<footer>
+    <br>
+  
+  Give the ratings for this page
+  <select ratings="">
+  <option value="5">5 </option>
+  <option value="4">4 </option>
+  <option value="3">3 </option>
+  <option value="2">2 </option>
+  <option value="1">1 </option>
+  
+  </select>
+  <br>
+  <br>
+  <textarea placeholder="Type your feedback here"></textarea>
+  <br>
+  
+  
+  </footer>
+  
+     
+  
+  </body>
+  </html>
